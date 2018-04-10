@@ -1,0 +1,524 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+ProjectOne-John Arena- Cmp Assembly Tu Thur 2-3;15pm.com -- emu8086 assembler version: 4.08  
+ 
+[ 11/15/2017  --  12:22:38 AM ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       
+[   2]        :                                       ; You may customize this and other start-up templates;
+[   3]        :                                       ; The location of this template is c:\emu8086\inc\0_com_template.txt
+[   4]        :                                       
+[   5]        :                                       
+[   6]        :                                       
+[   7]        :                                       ;*************************************CREATED IN EMU8086***************************************;
+[   8]        :                                       
+[   9]        :                                       
+[  10]        :                                       ;Computer Assembly- Tu/Thur 2-3:15pm
+[  11]        :                                       ;John Arena - Last 4: 9781
+[  12]        :                                       ;Used emu8086 some syntax may be different then TASM
+[  13]        :                                       ;Note- In running in 8086, board color did not overlap box border. In DOSBOX, it does!
+[  14]        :                                       org 100h
+[  15]        :                                       
+[  16]        :                                       
+[  17]    0100:                                       start:
+[  18]    0100: 8C C8                                 mov ax, @data
+[  19]    0102: 8E D8                                 mov ds, ax
+[  20]        :                                       
+[  21]    0104: B8 00 B8                              mov ax, 0B800h
+[  22]    0107: 8E C0                                 mov es, ax
+[  23]        :                                       
+[  24]    0109: B8 03 00                              mov ax, 0003h ; Size of 80x25(al=03, ah=00)
+[  25]    010C: CD 10                                 int 10h
+[  26]        :                                       ;    mov ah, 06h
+[  27]        :                                       ;    xor al, al                  ; clear screen
+[  28]        :                                       ;    xor cx, cx
+[  29]        :                                       ;    mov dx, 184fh               ; upper left, lower right
+[  30]        :                                       ;    mov bh, 2fh                 ; background green, foreground white
+[  31]        :                                       ;    int 10h                     ; interrupt call
+[  32]        :                                       
+[  33]    010E: 33 FF                                 xor di, di                  ; vid mem offset 0
+[  34]    0110: B8 20 2F                              mov ax, 02f00h + ' '        ; green background, white foreground
+[  35]    0113: B9 D0 07                              mov cx, 80*25               ; This amount is stored in cx and cx counts down from for the instruction below
+[  36]    0116: F3 AB                                 rep stosw                   ; clears screen by overwriting memory
+[  37]        :                                       
+[  38]        :                                       ;******* ALTERNATIVE WAY TO COLOR SCREEN BELOW********;
+[  39]    0118: B4 06                                 mov ah, 06h                 ; Scroll up function
+[  40]    011A: B5 02                                 mov ch, 2                   ; Upper left corner CH=row, CL=column
+[  41]    011C: B1 02                                 mov cl, 2
+[  42]    011E: BA 34 16                              mov dx, 1634H               ; lower right corner DH=row, DL=column
+[  43]    0121: B7 6F                                 mov bh, 6fh                 ; YellowOnBlue
+[  44]    0123: CD 10                                 INT 10H
+[  45]        :                                       
+[  46]        :                                       
+[  47]        :                                       ;formula for offsets are (y*80 +1)*2
+[  48]    0125: BB 02 00                              mov bx, (0*80+1)*2                   ; start at offset of [1,0] character ([x,y]) (top horizontal line of border)
+[  49]    0128: BF 02 0F                              mov di, (24*80+1)*2                ; (bottom horizontal line of border)
+[  50]    012B:                                       l1:
+[  51]    012B: B0 C4                                 mov al, 196
+[  52]    012D: B4 0F                                 mov ah, 0fh
+[  53]        :                                       ; mov ah, 9Fh- COLORTEST
+[  54]    012F: 26 89 07                              mov ptr es: [bx], ax    ; display '-' at "coordinate" bx
+[  55]    0132: 26 89 05                              mov ptr es: [di], ax    ; same as above
+[  56]    0135: 83 C3 02                              add bx, 2                ; move 2 horizontally
+[  57]    0138: 83 C7 02                              add di, 2                ; same as above
+[  58]    013B: 81 FB 9E 00                           cmp bx, 158              ; compare to the width of the window (160-2 because want room for a box corner)
+[  59]    013F: 7C EA                                 jl l1                    ; loop if less than the width
+[  60]    0141: BB A0 00                              mov bx, 160                 ; start offset 160 (left vertical line of border)
+[  61]    0144:                                       l2:
+[  62]    0144: B0 B3                                 mov al, 179
+[  63]    0146: B4 0F                                 mov ah, 0fh
+[  64]    0148: 26 89 07                              mov ptr es: [bx], ax   ; display vertical dash at "coordinate"
+[  65]    014B: 26 89 87 9E 00                        mov ptr es: [bx+158], ax   ; same as above
+[  66]    0150: 81 C3 A0 00                           add bx, 160             ; move "1" down horizontally
+[  67]    0154: 81 FB 00 0F                           cmp bx, 3840            ; compare to height of the window
+[  68]    0158: 7C EA                                 jl l2                   ; loop if less than the  height
+[  69]    015A: BB A4 00                              mov bx, 164                 ; start of offset for game "box" (top horizontal)
+[  70]    015D:                                       grHor:
+[  71]    015D: 26 C6 07 C4                           mov  ptr es: [bx], 196   ; print a dash
+[  72]    0161: 26 C6 87 C0 0D C4                     mov byte ptr es: [bx+3520], 196 ;3684
+[  73]    0167: 83 C3 02                              add bx, 2               ; move 2 horizontally
+[  74]    016A: 81 FB 0A 01                           cmp bx, 266             ; compare with game "box" width (266-164=102)
+[  75]    016E: 7C ED                                 jl grHor                ; loop if less than width
+[  76]    0170: BB 42 01                              mov bx, 322                 ; start of offset for game "box" (left vertical)
+[  77]    0173:                                       grVer:
+[  78]    0173: B0 B3                                 mov al, 179
+[  79]    0175: B4 3F                                 mov ah, 3fh
+[  80]    0177: 26 89 07                              mov  ptr es: [bx], ax   ; print vertical dash
+[  81]    017A: 26 C6 47 68 B3                        mov byte ptr es: [bx+104], 179 ; 426
+[  82]    017F: 81 C3 A0 00                           add bx, 160             ; move "1" vertically
+[  83]    0183: 81 FB 62 0E                           cmp bx, 3682            ; compare with game "box" height (3682-322=3660)
+[  84]    0187: 7C EA                                 jl grVer                ; loop if less than height
+[  85]    0189: BB C4 03                              mov bx, 964                 ; horizontal grid line 1
+[  86]    018C:                                       grHorL:
+[  87]    018C: 26 C6 07 C4                           mov byte ptr es: [bx], 196   ; print dash
+[  88]    0190: 26 C6 87 20 03 C4                     mov byte ptr es: [bx+800], 196;1764
+[  89]    0196: 26 C6 87 E0 06 C4                     mov byte ptr es: [bx+1760], 196 ; 2724
+[  90]    019C: 83 C3 02                              add bx, 2               ; move 2 horizontally
+[  91]    019F: 81 FB 2A 04                           cmp bx, 1066            ; compare width of game "box",(1066-964=102)
+[  92]    01A3: 7C E7                                 jl grHorL               ; loop if less than "box" width
+[  93]    01A5: BB 5C 01                              mov bx, 348                 ; vertical grid line 1
+[  94]    01A8:                                       grVerL:
+[  95]    01A8: 26 C6 07 B3                           mov byte ptr es: [bx], 179   ; print vertical dash
+[  96]    01AC: 26 C6 47 1A B3                        mov byte ptr es: [bx+26], 179 ;374
+[  97]    01B1: 26 C6 47 34 B3                        mov byte ptr es: [bx+52], 179     ;400
+[  98]    01B6: 81 C3 A0 00                           add bx, 160             ; move "1" vertically downward
+[  99]    01BA: 81 FB 7C 0E                           cmp bx, 3708            ; compare height of game "box" (3708-348=3360)
+[ 100]    01BE: 7C E8                                 jl grVerL
+[ 101]    01C0: BB DC 03                              mov bx, 988                 ; This is where I will start a "+" for grid line crossings
+[ 102]    01C3:                                       grInt:
+[ 103]    01C3: 26 C6 07 C5                           mov byte ptr es: [bx], 197   ; ascii code for the "+" symbol
+[ 104]    01C7: 26 C6 87 20 03 C5                     mov byte ptr es: [bx+800], 197;1788
+[ 105]    01CD: 26 C6 87 E0 06 C5                     mov byte ptr es: [bx+1760], 197;2748
+[ 106]    01D3: 83 C3 1A                              add bx, 26              ; move across a certain amount to be approximately centered-
+[ 107]    01D6: 81 FB 2A 04                           cmp bx, 1066            ; compare with the game "box" width
+[ 108]    01DA: 7C E7                                 jl grInt                ; loop of less than width
+[ 109]    01DC: BB BC 00                              mov bx, 188                 ; This is where I will start a special character that looks-
+[ 110]    01DF:                                       grVerEnds:                  ; for the top of the game "box"
+[ 111]    01DF: 26 C6 07 C2                           mov byte ptr es: [bx], 194   ; special character for the left side
+[ 112]    01E3: 26 C6 87 C0 0D C1                     mov byte ptr es: [bx+3520], 193   ; special character for the right side
+[ 113]    01E9: 83 C3 1A                              add bx, 26
+[ 114]    01EC: 81 FB 0A 01                           cmp bx, 266             ; compare width game "box" width
+[ 115]    01F0: 7C ED                                 jl grVerEnds            ; loop of less than width
+[ 116]        :                                       
+[ 117]        :                                       
+[ 118]    01F2: B0 BB                                 mov al, 187
+[ 119]    01F4: B4 0F                                 mov ah, 0fh
+[ 120]    01F6: BB 9E 00                              mov bx, 158                       ; Since there is no perfect way to display all of the-
+[ 121]    01F9: 26 89 07                              mov ptr es: [bx], ax              ; corners, you have to do each one individually
+[ 122]    01FC: 26 C6 06 0A 01 BB                     mov byte ptr es: [266], 187       ; With that said, these each places corners for the border-
+[ 123]    0202: B0 C9                                 mov al, 201
+[ 124]    0204: B4 0F                                 mov ah, 0fh
+[ 125]    0206: 26 89 87 62 FF                        mov ptr es: [bx-158], ax
+[ 126]    020B: 26 C6 06 A2 00 C9                     mov byte ptr es: [162], 201
+[ 127]    0211: B0 BC                                 mov al, 188
+[ 128]    0213: B4 0F                                 mov ah, 0fh
+[ 129]    0215: 26 89 87 00 0F                        mov ptr es: [bx+3840], ax
+[ 130]    021A: 26 C6 06 CA 0E BC                     mov byte ptr es: [3786], 188
+[ 131]    0220: 26 C6 06 62 0E C8                     mov byte ptr es: [3682], 200
+[ 132]    0226: B0 C8                                 mov al, 200
+[ 133]    0228: B4 0F                                 mov ah, 0fh
+[ 134]    022A: 26 89 87 62 0E                        mov ptr es: [bx+3682], ax
+[ 135]    022F: 26 C6 06 C2 03 C3                     mov byte ptr es: [962], 195
+[ 136]    0235: 26 C6 06 E2 06 C3                     mov byte ptr es: [1762], 195
+[ 137]    023B: 26 C6 06 A2 0A C3                     mov byte ptr es: [2722], 195
+[ 138]    0241: 26 C6 06 2A 04 B4                     mov byte ptr es: [1066], 180
+[ 139]    0247: 26 C6 06 4A 07 B4                     mov byte ptr es: [1866], 180
+[ 140]    024D: 26 C6 06 0A 0B B4                     mov byte ptr es: [2826], 180
+[ 141]        :                                       
+[ 142]    0253: BB 8E 02                              mov bx, 654                 ; start offset for printing board numbers
+[ 143]    0256:                                       printValuesLoop:
+[ 144]    0256: 8B 3E 86 05                           mov di, arrayIndex
+[ 145]    025A: 8B B5 65 05                           mov si, arrayOne[di]
+[ 146]    025E: 83 06 86 05 02                        add arrayIndex, 2
+[ 147]    0263: 8B C6                                 mov ax, si              ; assign variable value
+[ 148]    0265: B1 0A                                 mov cl, 10
+[ 149]    0267: F6 F1                                 div cl                  ; Divide by 10 to get answer and remainder
+[ 150]    0269: A2 88 05                              mov digitOne, al        ; answer
+[ 151]    026C: 88 26 89 05                           mov digitTwo, ah        ; remainder
+[ 152]    0270: 04 30                                 add al, 48              ; gives the ascii code 48 to the lower bit
+[ 153]    0272: 80 C4 30                              add ah, 48
+[ 154]    0275: 26 88 07                              mov byte ptr es: [bx], al    ; display number
+[ 155]    0278: 26 88 67 02                           mov byte ptr es: [bx+2], ah
+[ 156]    027C: 80 3E 85 05 03                        cmp count, 3            ; counter for determining whether you get to edge of game "box"
+[ 157]    0281: 74 10                                 jz thenblock            ; if zero flag set to 0, jump to then block (3-3)
+[ 158]    0283: FE 06 85 05                           inc count               ; increment counter (emu8086 doesnt support inc, byte count-
+[ 159]    0287: 83 C3 1A                              add bx, 26              ; - so i used add instead
+[ 160]    028A: 81 FB EA 0C                           cmp bx, 3306            ; above line is move horizontally 2, and cmp to bottom right -
+[ 161]    028E: 7C C6                                 jl printValuesLoop      ; -edge of game "box". loop
+[ 162]    0290: E9 6D FD                              jmp                     ; jmp out of this if statement when task is done
+[ 163]    0293:                                       thenblock:
+[ 164]    0293: C6 06 85 05 00                        mov count, 0            ; reset counter
+[ 165]    0298: 81 C3 D2 02                           add bx, 722             ; move one row (row as in row of boxes) using this offset
+[ 166]    029C: 81 FB EA 0C                           cmp bx, 3306            ; this compare to check if you are at the bottom right, -
+[ 167]    02A0: 7C B4                                 jl printValuesLoop      ; if not, jump back to if statement printValuesLoop
+[ 168]        :                                       
+[ 169]        :                                       
+[ 170]    02A2: BB 92 08                              mov bx, 2194
+[ 171]    02A5: 33 F6                                 xor si, si
+[ 172]    02A7:                                       printString:
+[ 173]    02A7: B4 00                                 		mov ah, 00h                   ;hollow out upper AX
+[ 174]    02A9: 8A 84 90 05                           mov al, string1[si]           ;get character in string
+[ 175]    02AD: 26 88 07                              mov byte ptr es: [bx], al     ;print character at position
+[ 176]    02B0: 8A 84 AA 05                           mov al, string2[si]           ;Same for other strings just with offset
+[ 177]    02B4: 26 88 87 A0 00                        mov byte ptr es: [bx+160], al
+[ 178]    02B9: 8A 84 BF 05                           mov al, string3[si]
+[ 179]    02BD: 26 88 87 40 01                        mov byte ptr es: [bx+320], al
+[ 180]    02C2: 8A 84 D4 05                           mov al, string4[si]
+[ 181]    02C6: 26 88 87 E0 01                        mov byte ptr es: [bx+480], al
+[ 182]    02CB: 8A 84 E9 05                           mov al, string5[si]
+[ 183]    02CF: 26 88 87 80 02                        mov byte ptr es: [bx+640], al
+[ 184]    02D4: 8A 84 FE 05                           mov al, string6[si]
+[ 185]    02D8: 26 88 87 20 03                        mov byte ptr es: [bx+800], al
+[ 186]    02DD: 8A 84 13 06                           mov al, string7[si]
+[ 187]    02E1: 26 88 87 1E F9                        mov byte ptr es: [bx-1762], al
+[ 188]    02E6: 8A 84 28 06                           mov al, string8[si]
+[ 189]    02EA: 26 88 87 C0 F9                        mov byte ptr es: [bx-1600], al
+[ 190]    02EF: 8A 84 3D 06                           mov al, string9[si]
+[ 191]    02F3: 26 88 87 60 FA                        mov byte ptr es: [bx-1440], al
+[ 192]    02F8: 8A 84 52 06                           mov al, string10[si]
+[ 193]    02FC: 26 88 87 00 FB                        mov byte ptr es: [bx-1280], al
+[ 194]    0301: 8A 84 67 06                           mov al, string11[si]
+[ 195]    0305: 26 88 87 A0 FB                        mov byte ptr es: [bx-1120], al
+[ 196]    030A: 8A 84 7C 06                           mov al, string12[si]
+[ 197]    030E: 26 88 87 40 FC                        mov byte ptr es: [bx-960], al
+[ 198]    0313: 8A 84 91 06                           mov al, string13[si]
+[ 199]    0317: 26 88 87 60 FF                        mov byte ptr es: [bx-160], al
+[ 200]    031C: 83 C3 02                              add bx, 2                     ; Next character over
+[ 201]    031F: 46                                    inc si                        ; Increment index
+[ 202]    0320: 83 FE 15                              cmp si, 21                    ; Length of longest string, a sort of cheat to loop-
+[ 203]    0323: 72 82                                 jb printString                ; -through all the strings by adding spaces to have = size
+[ 204]        :                                       
+[ 205]    0325: B4 02                                 mov ah, 02h                     ;Set to set cursor position mode
+[ 206]    0327: B7 00                                 mov bh, 0                       ;Page number
+[ 207]    0329: B6 0E                                 mov dh, 14                      ;Set y value : these numbers will select number above empty-
+[ 208]    032B: B2 21                                 mov dl, 33                      ;Set x value : -space at start of the game
+[ 209]    032D: CD 10                                 int 10h                         ;Interrupt call
+[ 210]    032F:                                       gameFunctions:
+[ 211]    032F: B4 01                                 mov ah, 01h                 ; Set cursor type mode
+[ 212]    0331: B5 06                                 	mov ch, 6
+[ 213]    0333: B1 07                                 	mov cl, 7
+[ 214]    0335: B4 01                                 	mov ah, 1                   ; Set to underline cursor
+[ 215]    0337: CD 10                                 	int 10h                     ; Interrupt call
+[ 216]    0339: B4 00                                 mov ah, 00h                 ; Get keystroke from keyboard buffer
+[ 217]    033B: CD 16                                 int 16h                     ; Interrupt call
+[ 218]    033D: 80 FC 48                              cmp ah, 72                  ; Check if keystroke equal to BIOS scan code for UP key-
+[ 219]    0340: 74 1A                                 je keyUp                    ; if equal, jump to keyUp
+[ 220]    0342: 80 FC 50                              cmp ah, 80                  ; Check equal to BIOS scan code for DOWN key
+[ 221]    0345: 74 25                                 je keyDown                  ; equal than jump to keyDown
+[ 222]    0347: 80 FC 4B                              cmp ah, 75                  ; Check equal to BIOS scan code for LEFT key
+[ 223]    034A: 74 30                                 je keyLeft                  ; equal than jump to keyLeft
+[ 224]    034C: 80 FC 4D                              cmp ah, 77                  ; Check equal to BIOS scan code for RIGHT key
+[ 225]    034F: 74 3B                                 je keyRight                 ; equal than jump to keyRight
+[ 226]    0351: 80 FC 1C                              cmp ah, 28                  ; Check equal to BIOS scan code for ENTER key-
+[ 227]    0354: 74 51                                 je keyEnter                 ; equal than jump to keyEnter
+[ 228]    0356: 3C 1B                                 cmp al, 27                  ; Check equal to ascii code for ESC key
+[ 229]    0358: 74 42                                 je keyESC                   ; equal than jump to keyESC
+[ 230]    035A: EB D3                                 jmp gameFunctions           ; otherwise loop back
+[ 231]    035C:                                       keyUp:
+[ 232]    035C: B4 02                                 mov ah, 02h                 ; Set cursor position mode
+[ 233]    035E: B7 00                                 mov bh, 0                   ; Page number
+[ 234]    0360: 80 FE 04                              cmp dh, 4                   ; Check if cursor is at the highest it can go on board-
+[ 235]    0363: 74 CA                                 je gameFunctions            ; to prevent going off screen-If it is, don't move up, jmp back
+[ 236]    0365: 80 EE 05                              sub dh, 5                   ; Otherwise, mov 5 positions "upward" (currentY-5)
+[ 237]    0368: CD 10                                 int 10h                     ; Interrupt call
+[ 238]    036A: EB C3                                 jmp gameFunctions           ; Jump back to game functions
+[ 239]    036C:                                       keyDown:
+[ 240]    036C: B4 02                                 mov ah, 02h                 ; Set cursor position mode
+[ 241]    036E: B7 00                                 mov bh, 0                   ; Page number
+[ 242]    0370: 80 FE 13                              cmp dh, 19                  ; Check if cursor is at the lowest it can go on board-
+[ 243]    0373: 74 BA                                 je gameFunctions            ; to prevent going off screen-If it is, don't move down, jmp back
+[ 244]    0375: 80 C6 05                              add dh, 5                   ; Otherwise, mov 5 positions "downward" (currentY+5)
+[ 245]    0378: CD 10                                 int 10h                     ; Interrupt call
+[ 246]    037A: EB B3                                 jmp gameFunctions           ; Jump back to game functions
+[ 247]    037C:                                       keyLeft:
+[ 248]    037C: B4 02                                 mov ah, 02h                 ; Set cursor position mode
+[ 249]    037E: B7 00                                 mov bh, 0                   ; Page number
+[ 250]    0380: 80 FA 07                              cmp dl, 7                   ; Check if cursor is at the left most side of the board-
+[ 251]    0383: 74 AA                                 je gameFunctions            ; to prevent going off screen-Ifit is, don't move left, jmp back
+[ 252]    0385: 80 EA 0D                              sub dl, 13                  ; Otherwise, mov 7 positions left
+[ 253]    0388: CD 10                                 int 10h                     ; Interrupt call
+[ 254]    038A: EB A3                                 jmp gameFunctions           ; Jump back to game functions
+[ 255]    038C:                                       keyRight:
+[ 256]    038C: B4 02                                 mov ah, 02h                 ; Set cursor position mode
+[ 257]    038E: B7 00                                 mov bh, 0                   ; Page number
+[ 258]    0390: 80 FA 2E                              cmp dl, 46                  ; Check if cursor is at the right most side of the board-
+[ 259]    0393: 74 9A                                 je gameFunctions            ; to prevent going off screen-Ifit is, don't move right, jmp back
+[ 260]    0395: 80 C2 0D                              add dl, 13                  ; Otherwise, mov 7 positions right
+[ 261]    0398: CD 10                                 int 10h                     ; Interrupt call
+[ 262]    039A: EB 93                                 jmp gameFunctions           ; Jump back to game functions
+[ 263]    039C:                                       keyESC:
+[ 264]    039C: 33 FF                                 xor di, di                  ; vid mem offset 0
+[ 265]    039E: B8 20 07                              mov ax, 00700h + ' '        ; green background, white foreground
+[ 266]    03A1: B9 D0 07                              mov cx, 80*25               ; This amount is stored in cx and cx counts down from for the instruction below
+[ 267]    03A4: F3 AB                                 rep stosw                   ; clears screen by overwriting memory
+[ 268]    03A6: C3                                    ret
+[ 269]    03A7:                                       keyEnter:
+[ 270]    03A7: B4 01                                 mov ah, 01h                 ; Set text-cursor mode shape
+[ 271]    03A9: B5 00                                 mov ch, 0                   ; Box shaped cursor
+[ 272]    03AB: B1 07                                 	mov cl, 7
+[ 273]    03AD: B4 01                                 	mov ah, 1
+[ 274]    03AF: CD 10                                 	int 10h                     ; Interrupt call
+[ 275]    03B1: 8A C6                                 mov al, dh                  ; al equal to y position
+[ 276]    03B3: B3 50                                 mov bl, 80                  ; bl equal to 80
+[ 277]    03B5: F6 E3                                 mul bl                      ; ax=y*80
+[ 278]    03B7: 8A CA                                 mov cl, dl                  ; cl holds x value
+[ 279]    03B9: B5 00                                 mov ch, 0                   ; 0 out the higher bits (so we can increase data size)
+[ 280]    03BB: 03 C1                                 add ax,cx                   ; Formula (y*80+x)
+[ 281]    03BD: D1 E0                                 shl ax, 1                   ; Full formula (y*80+x)*2, so shift left for multiply by 2
+[ 282]    03BF: A3 8E 05                              mov location, ax            ; Location on screen set to ax's value
+[ 283]    03C2: B4 08                                 mov ah, 08h                 ; Set read character and attribute at cursor position mode
+[ 284]    03C4: B7 00                                 	mov bh, 0                   ; Page number that cursor is on
+[ 285]    03C6: CD 10                                 	int 10h
+[ 286]        :                                       	;mov bh, ah                 ; Store attribute of character in BH
+[ 287]    03C8: A2 8A 05                              	mov digOneOrig, al          ; Store ascii of character in variable
+[ 288]    03CB: B4 02                                 	mov ah, 02h                 ; Set cursor position mode
+[ 289]    03CD: B7 00                                 	mov bh, 0                   ; Page number
+[ 290]    03CF: FE C2                                 	inc dl                      ; Move x+1 to get second digit
+[ 291]    03D1: CD 10                                 	int 10h
+[ 292]    03D3: B4 08                                 	mov ah, 08h                 ; Set read character and attribute at cursor position mode
+[ 293]    03D5: B7 00                                 	mov bh, 0                   ; Page number that cursor is on
+[ 294]    03D7: CD 10                                 	int 10h                     ; Interrupt call
+[ 295]    03D9: A2 8B 05                              	mov digTwoOrig, al
+[ 296]    03DC: B4 02                                 	mov ah, 02h                 ; Set cursor position mode
+[ 297]    03DE: B7 00                                 	mov bh, 0                   ; Page number
+[ 298]    03E0: FE CA                                 	dec dl                      ; Move (x+1)-1 to go back to first digit (just so 1st digit
+[ 299]        :                                       	; is underlined, otherwise the player may think we are selecting the second digit
+[ 300]    03E2: CD 10                                 	int 10h                     ; Interrupt call
+[ 301]    03E4: B4 00                                 	mov ah, 00h                 ; get keystroke from keyboard buffer
+[ 302]    03E6: CD 16                                 	int 16h
+[ 303]        :                                       	;mov swapBoolean, 1         ; Setting the "boolean" swap to 1 to get ready for swapping
+[ 304]    03E8: 80 FC 1C                              	cmp ah, 28
+[ 305]    03EB: 75 03 E9 3F FF                        	je gameFunctions           ; If enter is pressed again, deselect. Return to game functi
+[ 306]    03F0: 80 FC 48                              cmp ah, 72                  ; check if keystroke equal to BIOS scan code for UP key-
+[ 307]    03F3: 75 03 E9 BD 00                        je swapUp                    ; if equal, jump to keyUp
+[ 308]        :                                       ;mov swapBoolean, 1
+[ 309]    03F8: 80 FC 50                              cmp ah, 80                  ; check equal to BIOS scan code for DOWN key
+[ 310]    03FB: 75 03 E9 0D 01                        je swapDown                  ; equal than jump to keyDown
+[ 311]    0400: 80 FC 4B                              cmp ah, 75                  ; check equal to BIOS scan code for LEFT key
+[ 312]    0403: 74 07                                 je swapLeft                  ; equal than jump to keyLeft
+[ 313]    0405: 80 FC 4D                              cmp ah, 77                  ; check equal to BIOS scan code for RIGHT key
+[ 314]    0408: 74 55                                 je swapRight                 ; equal than jump to keyRight
+[ 315]    040A: EB 9B                                 jmp keyEnter
+[ 316]    040C:                                       swapLeft:
+[ 317]    040C: B4 02                                 mov ah, 02h                 ; Set cursor position mode
+[ 318]    040E: B7 00                                 mov bh, 0                   ; Page number
+[ 319]    0410: 80 FA 07                              cmp dl, 7                   ; Check if cursor is at the left most side of the board-
+[ 320]    0413: 74 92                                 je keyEnter                 ; to prevent going off screen-Ifit is, don't move left, jmp back
+[ 321]    0415: 80 EA 0D                              sub dl, 13                  ; Otherwise, mov 7 positions left
+[ 322]    0418: CD 10                                 int 10h
+[ 323]    041A: B4 08                                 mov ah, 08h                 ; Set read character and attribute at cursor position mode
+[ 324]    041C: B7 00                                 	mov bh, 0                   ; Page number that cursor is on
+[ 325]    041E: CD 10                                 	int 10h
+[ 326]        :                                       	;mov bh, ah                 ; Store attribute of character in BH
+[ 327]    0420: A2 8C 05                              	mov digOneSwap, al          ; Store ascii of character in variable
+[ 328]    0423: B4 02                                 	mov ah, 02h                 ; Set cursor position mode
+[ 329]    0425: B7 00                                 	mov bh, 0                   ; Page number
+[ 330]    0427: FE C2                                 	inc dl                      ; Move x+1 to get second digit
+[ 331]    0429: CD 10                                 	int 10h
+[ 332]    042B: B4 08                                 	mov ah, 08h                 ; Set read character and attribute at cursor position mode
+[ 333]    042D: B7 00                                 	mov bh, 0                   ; Page number that cursor is on
+[ 334]    042F: CD 10                                 	int 10h                     ; Interrupt call
+[ 335]    0431: A2 8D 05                              	mov digTwoSwap, al
+[ 336]    0434: B4 02                                 	mov ah, 02h                 ; Set cursor position mode
+[ 337]    0436: B7 00                                 	mov bh, 0                   ; Page number
+[ 338]    0438: FE CA                                 	dec dl                      ; Move (x+1)-1 to go back to first digit (just so 1st digit
+[ 339]        :                                       	; is underlined, otherwise the player may think we are selecting the second digit
+[ 340]    043A: A0 8C 05                              	mov al, digOneSwap
+[ 341]    043D: 8A 26 8D 05                           	mov ah, digTwoSwap
+[ 342]    0441: 8A 0E 8A 05                           	mov cl, digOneOrig
+[ 343]    0445: 8A 2E 8B 05                           	mov ch, digTwoOrig
+[ 344]    0449: 8B 1E 8E 05                           	mov bx, location
+[ 345]    044D: 26 88 07                              	mov byte ptr es: [bx], al
+[ 346]    0450: 26 88 67 02                           	mov byte ptr es: [bx+2], ah
+[ 347]    0454: 26 88 6F E8                           	mov byte ptr es: [bx-24], ch
+[ 348]    0458: 26 88 4F E6                           	mov byte ptr es: [bx-26], cl
+[ 349]    045C: E9 D0 FE                              	jmp gameFunctions
+[ 350]    045F:                                       swapRight:
+[ 351]    045F: B4 02                                 mov ah, 02h                 ; Set cursor position mode
+[ 352]    0461: B7 00                                 mov bh, 0                   ; Page number
+[ 353]    0463: 80 FA 2E                              cmp dl, 46                   ; Check if cursor is at the right most side of the board-
+[ 354]    0466: 75 03 E9 3C FF                        je keyEnter                 ; to prevent going off screen-Ifit is, don't move right, jmp back
+[ 355]    046B: 80 C2 0D                              add dl, 13                  ; Otherwise, mov 7 positions right
+[ 356]    046E: CD 10                                 int 10h
+[ 357]    0470: B4 08                                 mov ah, 08h                 ; Set read character and attribute at cursor position mode
+[ 358]    0472: B7 00                                 	mov bh, 0                   ; Page number that cursor is on
+[ 359]    0474: CD 10                                 	int 10h
+[ 360]        :                                       	;mov bh, ah                 ; Store attribute of character in BH
+[ 361]    0476: A2 8C 05                              	mov digOneSwap, al          ; Store ascii of character in variable
+[ 362]    0479: B4 02                                 	mov ah, 02h                 ; Set cursor position mode
+[ 363]    047B: B7 00                                 	mov bh, 0                   ; Page number
+[ 364]    047D: FE C2                                 	inc dl                      ; Move x+1 to get second digit
+[ 365]    047F: CD 10                                 	int 10h
+[ 366]    0481: B4 08                                 	mov ah, 08h                 ; Set read character and attribute at cursor position mode
+[ 367]    0483: B7 00                                 	mov bh, 0                   ; Page number that cursor is on
+[ 368]    0485: CD 10                                 	int 10h                     ; Interrupt call
+[ 369]    0487: A2 8D 05                              	mov digTwoSwap, al
+[ 370]    048A: B4 02                                 	mov ah, 02h                 ; Set cursor position mode
+[ 371]    048C: B7 00                                 	mov bh, 0                   ; Page number
+[ 372]    048E: FE CA                                 	dec dl                      ; Move (x+1)-1 to go back to first digit (just so 1st digit
+[ 373]        :                                       	; is underlined, otherwise the player may think we are selecting the second digit
+[ 374]    0490: A0 8C 05                              	mov al, digOneSwap
+[ 375]    0493: 8A 26 8D 05                           	mov ah, digTwoSwap
+[ 376]    0497: 8A 0E 8A 05                           	mov cl, digOneOrig
+[ 377]    049B: 8A 2E 8B 05                           	mov ch, digTwoOrig
+[ 378]    049F: 8B 1E 8E 05                           	mov bx, location
+[ 379]    04A3: 26 88 07                              	mov byte ptr es: [bx], al
+[ 380]    04A6: 26 88 67 02                           	mov byte ptr es: [bx+2], ah
+[ 381]    04AA: 26 88 6F 1C                           	mov byte ptr es: [bx+28], ch
+[ 382]    04AE: 26 88 4F 1A                           	mov byte ptr es: [bx+26], cl
+[ 383]    04B2: E9 7A FE                              	jmp gameFunctions
+[ 384]    04B5:                                       swapUp:
+[ 385]    04B5: B4 02                                 mov ah, 02h                 ; Set cursor position mode
+[ 386]    04B7: B7 00                                 mov bh, 0                   ; Page number
+[ 387]    04B9: 80 FE 04                              cmp dh, 4                   ; Check if cursor is at the left most side of the board-
+[ 388]    04BC: 75 03 E9 E6 FE                        je keyEnter                 ; to prevent going off screen-Ifit is, don't move left, jmp back
+[ 389]    04C1: 80 EE 05                              sub dh, 5                  ; Otherwise, mov 7 positions left
+[ 390]    04C4: CD 10                                 int 10h
+[ 391]    04C6: B4 08                                 mov ah, 08h                 ; Set read character and attribute at cursor position mode
+[ 392]    04C8: B7 00                                 	mov bh, 0                   ; Page number that cursor is on
+[ 393]    04CA: CD 10                                 	int 10h
+[ 394]    04CC: A2 8C 05                              	mov digOneSwap, al          ; Store ascii of character in variable
+[ 395]    04CF: B4 02                                 	mov ah, 02h                 ; Set cursor position mode
+[ 396]    04D1: B7 00                                 	mov bh, 0                   ; Page number
+[ 397]    04D3: FE C2                                 	inc dl                      ; Move x+1 to get second digit
+[ 398]    04D5: CD 10                                 	int 10h
+[ 399]    04D7: B4 08                                 	mov ah, 08h                 ; Set read character and attribute at cursor position mode
+[ 400]    04D9: B7 00                                 	mov bh, 0                   ; Page number that cursor is on
+[ 401]    04DB: CD 10                                 	int 10h                     ; Interrupt call
+[ 402]    04DD: A2 8D 05                              	mov digTwoSwap, al
+[ 403]    04E0: B4 02                                 	mov ah, 02h                 ; Set cursor position mode
+[ 404]    04E2: B7 00                                 	mov bh, 0                   ; Page number
+[ 405]    04E4: FE CA                                 	dec dl                      ; Move (x+1)-1 to go back to first digit (just so 1st digit
+[ 406]        :                                       	; is underlined, otherwise the player may think we are selecting the second digit
+[ 407]    04E6: A0 8C 05                              	mov al, digOneSwap
+[ 408]    04E9: 8A 26 8D 05                           	mov ah, digTwoSwap
+[ 409]    04ED: 8A 0E 8A 05                           	mov cl, digOneOrig
+[ 410]    04F1: 8A 2E 8B 05                           	mov ch, digTwoOrig
+[ 411]    04F5: 8B 1E 8E 05                           	mov bx, location
+[ 412]    04F9: 26 88 07                              	mov byte ptr es: [bx], al
+[ 413]    04FC: 26 88 67 02                           	mov byte ptr es: [bx+2], ah
+[ 414]    0500: 26 88 AF E2 FC                        	mov byte ptr es: [bx-798], ch  ; 798
+[ 415]    0505: 26 88 8F E0 FC                        	mov byte ptr es: [bx-800], cl       ; 800
+[ 416]    050A: E9 22 FE                              	jmp gameFunctions
+[ 417]    050D:                                       swapDown:
+[ 418]    050D: B4 02                                 mov ah, 02h                 ; Set cursor position mode
+[ 419]    050F: B7 00                                 mov bh, 0                   ; Page number
+[ 420]    0511: 80 FE 13                              cmp dh, 19                  ; Check if cursor is at the left most side of the board-
+[ 421]    0514: 75 03 E9 8E FE                        je keyEnter                 ; to prevent going off screen-Ifit is, don't move left, jmp back
+[ 422]    0519: 80 C6 05                              add dh, 5                   ; Otherwise, mov 7 positions left
+[ 423]    051C: CD 10                                 int 10h
+[ 424]    051E: B4 08                                 mov ah, 08h                 ; Set read character and attribute at cursor position mode
+[ 425]    0520: B7 00                                 	mov bh, 0                   ; Page number that cursor is on
+[ 426]    0522: CD 10                                 	int 10h
+[ 427]    0524: A2 8C 05                              	mov digOneSwap, al          ; Store ascii of character in variable
+[ 428]    0527: B4 02                                 	mov ah, 02h                 ; Set cursor position mode
+[ 429]    0529: B7 00                                 	mov bh, 0                   ; Page number
+[ 430]    052B: FE C2                                 	inc dl                      ; Move x+1 to get second digit
+[ 431]    052D: CD 10                                 	int 10h
+[ 432]    052F: B4 08                                 	mov ah, 08h                 ; Set read character and attribute at cursor position mode
+[ 433]    0531: B7 00                                 	mov bh, 0                   ; Page number that cursor is on
+[ 434]    0533: CD 10                                 	int 10h                     ; Interrupt call
+[ 435]    0535: A2 8D 05                              	mov digTwoSwap, al
+[ 436]    0538: B4 02                                 	mov ah, 02h                 ; Set cursor position mode
+[ 437]    053A: B7 00                                 	mov bh, 0                   ; Page number
+[ 438]    053C: FE CA                                 	dec dl                      ; Move (x+1)-1 to go back to first digit (just so 1st digit
+[ 439]        :                                       	; is underlined, otherwise the player may think we are selecting the second digit
+[ 440]    053E: A0 8C 05                              	mov al, digOneSwap
+[ 441]    0541: 8A 26 8D 05                           	mov ah, digTwoSwap
+[ 442]    0545: 8A 0E 8A 05                           	mov cl, digOneOrig
+[ 443]    0549: 8A 2E 8B 05                           	mov ch, digTwoOrig
+[ 444]    054D: 8B 1E 8E 05                           	mov bx, location
+[ 445]    0551: 26 88 07                              	mov byte ptr es: [bx], al
+[ 446]    0554: 26 88 67 02                           	mov byte ptr es: [bx+2], ah
+[ 447]    0558: 26 88 AF 20 03                        	mov byte ptr es: [bx+800], ch
+[ 448]    055D: 26 88 8F 22 03                        	mov byte ptr es: [bx+802], cl
+[ 449]    0562: E9 CA FD                              	jmp gameFunctions
+[ 450]        :                                       
+[ 451]        :                                       ;*********************************************************************************************;
+[ 452]        :                                       ;* * * *DATA* * * *;
+[ 453]        :                                       
+[ 454]        :                                       ;arrayOne dw 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0                    ; testArray
+[ 455]    0565: 0D 00 02 00 0A 00 03 00 01 00 0C 00   arrayOne dw 13,2,10,3,1,12,8,4,5,0,9,6,15,14,11,7                    ; testArray
+                08 00 04 00 05 00 00 00 09 00 06 00 
+                0F 00 0E 00 0B 00 07 00             
+[ 456]    0585: 00                                    count db 0                      ; Counter for displaying numbers on board
+[ 457]    0586: 00 00                                 arrayIndex dw 0                 ; array index
+[ 458]    0588: 00                                    digitOne db 0                   ; Holds 1st digit when transforming array values to ascii
+[ 459]    0589: 00                                    digitTwo db 0                   ; Holds 2nd digit when transforming array values to ascii
+[ 460]    058A: 00                                    digOneOrig db ?                 ; Undeclared variable for selected number's first digit
+[ 461]    058B: 00                                    digTwoOrig db ?                 ; Undeclared variable for selected number's second digit
+[ 462]    058C: 00                                    digOneSwap db ?                 ; Undeclared variable for swap number's first digit
+[ 463]    058D: 00                                    digTwoSwap db ?                 ; Undeclared variable for swap number's second digit
+[ 464]        :                                       ;swapBoolean db ?               ;
+[ 465]    058E: 00 00                                 location dw ?                   ; Undeclared variable for location of number on screen
+[ 466]    0590: 5B 45 4E 54 45 52 5D 2D 53 65 6C 65   string1 db '[ENTER]-Select/De #  ',0dh,0ah,0,"hi"
+                63 74 2F 44 65 20 23 20 20 0D 0A 00 
+                68 69                               
+[ 467]    05AA: 5B 55 50 5D 2D 4D 6F 76 65 20 23 20   string2 db '[UP]-Move # Up       '
+                55 70 20 20 20 20 20 20 20          
+[ 468]    05BF: 5B 4C 45 46 54 5D 2D 4D 6F 76 65 20   string3 db '[LEFT]-Move # Left   '
+                23 20 4C 65 66 74 20 20 20          
+[ 469]    05D4: 5B 52 49 47 48 54 5D 2D 4D 6F 76 65   string4 db '[RIGHT]-Move # Right '
+                20 23 20 52 69 67 68 74 20          
+[ 470]    05E9: 5B 44 4F 57 4E 5D 2D 4D 6F 76 65 20   string5 db '[DOWN]-Move # Down   '
+                23 20 44 6F 77 6E 20 20 20          
+[ 471]    05FE: 5B 45 53 43 5D 2D 43 6C 6F 73 65 20   string6 db '[ESC]-Close Game     '
+                47 61 6D 65 20 20 20 20 20          
+[ 472]    0613: 20 20 20 20 20 54 48 45 20 31 35 20   string7 db '     THE 15 GAME     '
+                47 41 4D 45 20 20 20 20 20          
+[ 473]    0628: 50 75 74 20 74 68 65 20 6E 75 6D 62   string8 db 'Put the numbers in   '
+                65 72 73 20 69 6E 20 20 20          
+[ 474]    063D: 6F 72 64 65 72 20 66 72 6F 6D 20 30   string9 db 'order from 01-15! But'
+                31 2D 31 35 21 20 42 75 74          
+[ 475]    0652: 48 65 72 65 27 73 20 74 68 65 20 63   string10 db "Here's the catch, you"
+                61 74 63 68 2C 20 79 6F 75          
+[ 476]    0667: 63 61 6E 20 6F 6E 6C 79 20 73 77 61   string11 db 'can only swap with 00'
+                70 20 77 69 74 68 20 30 30          
+[ 477]    067C: 47 6F 6F 64 6C 75 63 6B 21 20 20 20   string12 db 'Goodluck!            '
+                20 20 20 20 20 20 20 20 20          
+[ 478]    0691: 4B 45 59 53 3A 20 20 20 20 20 20 20   string13 db 'KEYS:                '
+                20 20 20 20 20 20 20 20 20          
+[ 479]        :                                       
+[ 480]        :                                       
+[ 481]        :                                       end start
+[ 482]        :                                       
+[ 483]        :                                       
+[ 484]        :                                       
+[ 485]        :                                       
+[ 486]        :                                       
+[ 487]        :                                       
+[ 488]        :                                       
+[ 489]        :                                       
+[ 490]        :                                       
+ 
+===================================================================================================
+ 
+
+
+
+
+===================================================================================================
