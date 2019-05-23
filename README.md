@@ -5,6 +5,9 @@ This is a project based off an old board game called the game of 15. It also goe
 ## Objective of Game
 The main objective is to sort numbered blocks in order from 1 to 15 on a 4x4 grid, but the catch is you can only move blocks using an empty space. 
 
+## How to run
+1. It can be ran in the emulator known as "emu8086". Can also be ran using MS-DOSBOX.
+
 ## Controls
 * Enter - Select/Deselect #
 * Up Arrow - Move # up 1 box
