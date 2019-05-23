@@ -6,7 +6,7 @@ This is a project based off an old board game called the game of 15. It also goe
 The main objective is to sort numbered blocks in order from 1 to 15 on a 4x4 grid, but the catch is you can only move blocks using an empty space. 
 
 ## Controls
-⋅⋅* Enter - Select/Deselect #
+* Enter - Select/Deselect #
 ⋅⋅* Up Arrow - Move # up 1 box
 ⋅⋅* Down Arrow - Move # down 1 box
 ⋅⋅* Left Arrow - Move # left 1 box
