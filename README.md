@@ -7,11 +7,11 @@ The main objective is to sort numbered blocks in order from 1 to 15 on a 4x4 gri
 
 ## Controls
 * Enter - Select/Deselect #
-⋅⋅* Up Arrow - Move # up 1 box
-⋅⋅* Down Arrow - Move # down 1 box
-⋅⋅* Left Arrow - Move # left 1 box
-⋅⋅* Right Arrow - Move # 1 box
-⋅⋅* ESC - Close Game
+* Up Arrow - Move # up 1 box
+* Down Arrow - Move # down 1 box
+* Left Arrow - Move # left 1 box
+* Right Arrow - Move # 1 box
+* ESC - Close Game
 
 ## Known Bugs
 1. Sometimes the wrong digits may swap, even though in debug mode it shows the correct values swapped in memory. 
